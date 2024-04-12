@@ -130,7 +130,7 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- My own stuff to test things here.
 vim.keymap.set('i', 'oo', function()
   print 'testing this thing'
-end)
+end, { desc = 'Test this thing' })
 
 -- This is a convenient way to exit insert mode by pressing `jj` quickly
 -- but <C-c> and <C-[> are better ways to exit insert mode
@@ -533,10 +533,9 @@ require('lazy').setup({
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
-        --
-        -- You can use a sub-list to tell conform to run *until* a formatter
-        -- is found.
+        -- TODO: there must be a better way to add all the Prettier formatters here.
         javascript = { 'prettier' },
+        javascriptreact = { 'prettier' },
         css = { 'prettier' },
         html = { 'prettier' },
       },
@@ -751,7 +750,7 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   require 'kickstart.plugins.debug',
-  require 'kickstart.plugins.indent_line',
+  -- require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
@@ -783,4 +782,4 @@ require('lazy').setup({
 })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=4 sts=4 sw=4 et
+-- vim: ts=2 sts=2 sw=2 et
