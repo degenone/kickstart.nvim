@@ -137,6 +137,8 @@ end, { desc = 'Test this thing' })
 -- and I could rebind <Esc> key OR rebind <C-c> to <Esc> in insert mode.
 -- vim.keymap.set('i', 'jj', '<Esc>', { noremap = true })
 
+vim.keymap.set({ 'n', 'v' }, '<A-j>', ':m .+1<CR>==', { desc = 'move line down' })
+vim.keymap.set({ 'n', 'v' }, '<A-k>', ':m .-2<CR>==', { desc = 'move line up' })
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -440,10 +442,8 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        -- tsserver = {},
-        -- Choose one to use for Python, ruff_lsp might be the "older" one.
-        -- ruff = {},
-        -- ruff_lsp = {},
+        tsserver = {},
+        ruff_lsp = {},
         emmet_language_server = {},
         lua_ls = {
           -- cmd = {...},
@@ -470,6 +470,7 @@ require('lazy').setup({
         'stylua', -- Used to format Lua code
         'emmet_language_server', -- Used for HTML/CSS/JS/TS/... autocompletion
         'jsonlint', -- Used to lint JSON files
+        'ruff', -- Used for Python autocompletion
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -504,8 +505,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'ruff' },
         -- TODO: there must be a better way to add all the Prettier formatters here.
         javascript = { 'prettier' },
         javascriptreact = { 'prettier' },
@@ -536,12 +536,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
       },
       'saadparwaiz1/cmp_luasnip',
@@ -590,12 +590,6 @@ require('lazy').setup({
           --  completions whenever it has completion options available.
           ['<C-Space>'] = cmp.mapping.complete {},
 
-          -- Think of <c-l> as moving to the right of your snippet expansion.
-          --  So if you have a snippet that's like:
-          --  function $name($args)
-          --    $body
-          --  end
-          --
           -- <c-l> will move you to the right of each of the expansion locations.
           -- <c-h> is similar, except moving you backwards.
           ['<C-l>'] = cmp.mapping(function()
