@@ -140,8 +140,8 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- Move lines up and down with Alt-j/k (Alt is represented as <A-...>)
 vim.keymap.set('n', '<A-k>', ':m .-2<CR>==', { desc = 'move line up' })
 vim.keymap.set('n', '<A-j>', ':m .+1<CR>==', { desc = 'move line down' })
-vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { desc = 'move line down' })
-vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = 'move line up' })
+vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { desc = 'move lines down' })
+vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = 'move lines up' })
 
 -- dismiss copilot with <C-c> in insert mode
 vim.keymap.set('i', '<C-c>', '<plug>(copilot-dismiss)<c-c>', { noremap = true, desc = 'Dismiss copilot' })
