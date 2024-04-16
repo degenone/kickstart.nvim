@@ -434,7 +434,6 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -443,6 +442,7 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
         tsserver = {},
+        pyright = {},
         ruff_lsp = {},
         emmet_language_server = {},
         lua_ls = {
@@ -470,7 +470,8 @@ require('lazy').setup({
         'stylua', -- Used to format Lua code
         'emmet_language_server', -- Used for HTML/CSS/JS/TS/... autocompletion
         'jsonlint', -- Used to lint JSON files
-        'ruff', -- Used for Python autocompletion
+        'ruff',
+        'flake8', -- Used to lint Python files
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
