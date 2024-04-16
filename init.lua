@@ -128,17 +128,24 @@ vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower win
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- My own stuff to test things here.
-vim.keymap.set('i', 'oo', function()
-  print 'testing this thing'
-end, { desc = 'Test this thing' })
+-- vim.keymap.set('i', 'oo', function()
+--   print 'testing this thing'
+-- end, { desc = 'Test this thing' })
 
 -- This is a convenient way to exit insert mode by pressing `jj` quickly
 -- but <C-c> and <C-[> are better ways to exit insert mode
 -- and I could rebind <Esc> key OR rebind <C-c> to <Esc> in insert mode.
 -- vim.keymap.set('i', 'jj', '<Esc>', { noremap = true })
 
-vim.keymap.set({ 'n', 'v' }, '<A-j>', ':m .+1<CR>==', { desc = 'move line down' })
-vim.keymap.set({ 'n', 'v' }, '<A-k>', ':m .-2<CR>==', { desc = 'move line up' })
+-- Move lines up and down with Alt-j/k (Alt is represented as <A-...>)
+vim.keymap.set('n', '<A-k>', ':m .-2<CR>==', { desc = 'move line up' })
+vim.keymap.set('n', '<A-j>', ':m .+1<CR>==', { desc = 'move line down' })
+vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { desc = 'move line down' })
+vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = 'move line up' })
+
+-- dismiss copilot with <C-c> in insert mode
+vim.keymap.set('i', '<C-c>', '<plug>(copilot-dismiss)<c-c>', { noremap = true, desc = 'Dismiss copilot' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -598,7 +605,7 @@ require('lazy').setup({
               luasnip.expand_or_jump()
             end
           end, { 'i', 's' }),
-          ['<C-h>'] = cmp.mapping(function()
+          ['<C-g>'] = cmp.mapping(function()
             if luasnip.locally_jumpable(-1) then
               luasnip.jump(-1)
             end
