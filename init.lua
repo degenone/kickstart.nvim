@@ -479,6 +479,9 @@ require('lazy').setup({
         'jsonlint', -- Used to lint JSON files
         'ruff',
         'flake8', -- Used to lint Python files
+        'pylint', -- Used to lint Python files
+        'mypy', -- Used to type-check Python files
+        'isort', -- Used to sort Python imports
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -513,10 +516,11 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        python = { 'ruff' },
-        -- TODO: there must be a better way to add all the Prettier formatters here.
+        python = { 'isort', 'ruff' },
         javascript = { 'prettier' },
         javascriptreact = { 'prettier' },
+        typescript = { 'prettier' },
+        typescriptreact = { 'prettier' },
         css = { 'prettier' },
         html = { 'prettier' },
       },

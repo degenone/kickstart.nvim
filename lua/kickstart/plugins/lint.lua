@@ -8,6 +8,7 @@ return {
       lint.linters_by_ft = lint.linters_by_ft or {}
       lint.linters_by_ft['markdown'] = { 'markdownlint' }
       lint.linters_by_ft['json'] = { 'jsonlint' }
+      lint.linters_by_ft['python'] = { 'flake8', 'mypy', 'pylint' }
 
       lint.linters_by_ft['clojure'] = nil
       lint.linters_by_ft['dockerfile'] = nil
