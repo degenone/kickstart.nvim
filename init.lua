@@ -226,6 +226,28 @@ require('lazy').setup({
     },
   },
 
+  {
+    -- A plugin to help you select a Python virtual environment.
+    'linux-cultist/venv-selector.nvim',
+    opts = {
+      name = 'venv',
+    },
+    dependencies = {
+      'neovim/nvim-lspconfig',
+      -- 'mfussenegger/nvim-dap',
+      -- 'mfussenegger/nvim-dap-python', --optional
+      { 'nvim-telescope/telescope.nvim', branch = '0.1.x', dependencies = { 'nvim-lua/plenary.nvim' } },
+    },
+    lazy = false,
+    branch = 'regexp', -- This is the regexp branch, use this for the new version
+    config = function()
+      require('venv-selector').setup()
+    end,
+    keys = {
+      { ',v', '<cmd>VenvSelect<cr>' },
+    },
+  },
+
   { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
@@ -462,8 +484,25 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
         tsserver = {},
-        pyright = {},
-        ruff_lsp = {},
+        pyright = {
+          settings = {
+            pyright = {
+              disableOrganizeImports = true,
+            },
+            python = {
+              analysis = {
+                ignore = { '*' },
+              },
+            },
+          },
+        },
+        ruff_lsp = {
+          on_attach = function(client)
+            if client.name == 'ruff_lsp' then
+              client.server_capabilities.hoverProvider = false
+            end
+          end,
+        },
         emmet_language_server = {},
         lua_ls = {
           -- cmd = {...},
