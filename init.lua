@@ -151,10 +151,10 @@ vim.keymap.set('n', '<right>', 'gt', { desc = 'Move to next tab' })
 -- vim.keymap.set('i', 'jj', '<Esc>', { noremap = true })
 
 -- Move lines up and down with Alt-j/k (Alt is represented as <A-...>)
-vim.keymap.set('n', '<A-k>', ':m .-2<CR>==', { desc = 'move line up' })
-vim.keymap.set('n', '<A-j>', ':m .+1<CR>==', { desc = 'move line down' })
-vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { desc = 'move lines down' })
-vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = 'move lines up' })
+vim.keymap.set('n', '<A-k>', ':m .-2<CR>==', { desc = 'move line up', silent = true })
+vim.keymap.set('n', '<A-j>', ':m .+1<CR>==', { desc = 'move line down', silent = true })
+vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { desc = 'move lines down', silent = true })
+vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = 'move lines up', silent = true })
 
 -- dismiss copilot with <C-c> in insert mode
 vim.keymap.set('i', '<C-c>', '<plug>(copilot-dismiss)<c-c>', { noremap = true, desc = 'Dismiss copilot' })
@@ -485,24 +485,24 @@ require('lazy').setup({
         -- But for many setups, the LSP (`tsserver`) will work just fine
         tsserver = {},
         pyright = {
-          settings = {
-            pyright = {
-              disableOrganizeImports = true,
-            },
-            python = {
-              analysis = {
-                ignore = { '*' },
-              },
-            },
-          },
+          -- settings = {
+          --   pyright = {
+          --     disableOrganizeImports = true,
+          --   },
+          --   python = {
+          --     analysis = {
+          --       ignore = { '*' },
+          --     },
+          --   },
+          -- },
         },
-        ruff = {
-          on_attach = function(client)
-            if client.name == 'ruff' then
-              client.server_capabilities.hoverProvider = false
-            end
-          end,
-        },
+        -- ruff = {
+        --   on_attach = function(client)
+        --     if client.name == 'ruff' then
+        --       client.server_capabilities.hoverProvider = false
+        --     end
+        --   end,
+        -- },
         emmet_language_server = {},
         lua_ls = {
           -- cmd = {...},
@@ -529,7 +529,7 @@ require('lazy').setup({
         'stylua', -- Used to format Lua code
         'emmet_language_server', -- Used for HTML/CSS/JS/TS/... autocompletion
         'jsonlint', -- Used to lint JSON files
-        'ruff',
+        -- 'ruff',
         'flake8', -- Used to lint Python files
         'pylint', -- Used to lint Python files
         'mypy', -- Used to type-check Python files
