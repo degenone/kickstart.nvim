@@ -573,6 +573,7 @@ require('lazy').setup({
         javascriptreact = { 'prettier' },
         typescript = { 'prettier' },
         typescriptreact = { 'prettier' },
+        vue = { 'prettier' },
         css = { 'prettier' },
         html = { 'prettier' },
       },
