@@ -323,7 +323,7 @@ require('lazy').setup({
         'jsonlint', -- Used to lint JSON files
         -- 'ruff',
         'flake8', -- Used to lint Python files
-        'pylint', -- Used to lint Python files
+        'pyright', -- Used to lint Python files
         'mypy', -- Used to type-check Python files
         'isort', -- Used to sort Python imports
       })
