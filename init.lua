@@ -12,7 +12,10 @@ if vim.fn.has 'win32' == 1 then
   vim.o.shellpipe = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
   vim.o.shellquote = ''
   vim.o.shellxquote = ''
+elseif vim.fn.has 'unix' == 1 then
+  vim.g.python3_host_prog = '/usr/bin/python3.12'
 end
+
 -- The following 4 lines would make it so that a tab character is 4 spaces globally.
 -- vim.o.tabstop = 4 -- A TAB character looks like 4 spaces
 -- vim.o.expandtab = true -- Pressing the TAB key will insert spaces instead of a TAB character
@@ -323,7 +326,8 @@ require('lazy').setup({
         'jsonlint', -- Used to lint JSON files
         -- 'ruff',
         'flake8', -- Used to lint Python files
-        'pyright', -- Used to lint Python files
+        'pylint', -- Used to lint Python files
+        'pyright', -- Used to provide Python LSP
         'mypy', -- Used to type-check Python files
         'isort', -- Used to sort Python imports
       })
