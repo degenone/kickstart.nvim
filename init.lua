@@ -64,7 +64,7 @@ vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { desc = 'move lines down', sil
 vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = 'move lines up', silent = true })
 
 -- dismiss copilot with <C-c> in insert mode
-vim.keymap.set('i', '<C-c>', '<plug>(copilot-dismiss)<c-c>', { noremap = true, desc = 'Dismiss copilot' })
+-- vim.keymap.set('i', '<C-c>', '<plug>(copilot-dismiss)<c-c>', { noremap = true, desc = 'Dismiss copilot' })
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
