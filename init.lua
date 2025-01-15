@@ -85,7 +85,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup({
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
-  'github/copilot.vim',
+  -- 'github/copilot.vim',
   -- {
   --   'windwp/nvim-autopairs', -- alternative: cohama/lexima.vim
   --   event = 'InsertEnter',
@@ -126,22 +126,22 @@ require('lazy').setup({
     },
   },
 
-  { -- Useful plugin to show you pending keybinds.
-    'folke/which-key.nvim',
-    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
-    config = function() -- This is the function that runs, AFTER loading
-      require('which-key').setup()
-      require('which-key').add {
-        { '<leader>c', group = '[C]ode' },
-        { '<leader>d', group = '[D]ocument' },
-        { '<leader>r', group = '[R]ename' },
-        { '<leader>s', group = '[S]earch' },
-        { '<leader>w', group = '[W]orkspace' },
-        { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
-      }
-    end,
-  },
+  -- { -- Useful plugin to show you pending keybinds.
+  --   'folke/which-key.nvim',
+  --   event = 'VimEnter', -- Sets the loading event to 'VimEnter'
+  --   config = function() -- This is the function that runs, AFTER loading
+  --     require('which-key').setup()
+  --     require('which-key').add {
+  --       { '<leader>c', group = '[C]ode' },
+  --       { '<leader>d', group = '[D]ocument' },
+  --       { '<leader>r', group = '[R]ename' },
+  --       { '<leader>s', group = '[S]earch' },
+  --       { '<leader>w', group = '[W]orkspace' },
+  --       { '<leader>t', group = '[T]oggle' },
+  --       { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+  --     }
+  --   end,
+  -- },
 
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
@@ -326,10 +326,10 @@ require('lazy').setup({
         'jsonlint', -- Used to lint JSON files
         -- 'ruff',
         'flake8', -- Used to lint Python files
-        'pylint', -- Used to lint Python files
+        -- 'pylint', -- Used to lint Python files
         'pyright', -- Used to provide Python LSP
-        'mypy', -- Used to type-check Python files
-        'isort', -- Used to sort Python imports
+        -- 'mypy', -- Used to type-check Python files
+        -- 'isort', -- Used to sort Python imports
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -370,7 +370,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        python = { 'isort', 'ruff' },
+        -- python = { 'isort', 'ruff' },
         javascript = { 'prettier' },
         javascriptreact = { 'prettier' },
         typescript = { 'prettier' },
