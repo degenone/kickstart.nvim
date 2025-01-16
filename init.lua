@@ -315,12 +315,8 @@ require('lazy').setup({
         'stylua', -- Used to format Lua code
         'emmet_language_server', -- Used for HTML/CSS/JS/TS/... autocompletion
         'jsonlint', -- Used to lint JSON files
-        -- 'ruff',
         'flake8', -- Used to lint Python files
-        -- 'pylint', -- Used to lint Python files
         'pyright', -- Used to provide Python LSP
-        -- 'mypy', -- Used to type-check Python files
-        -- 'isort', -- Used to sort Python imports
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
