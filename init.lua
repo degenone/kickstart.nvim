@@ -251,7 +251,19 @@ require('lazy').setup({
         -- clangd = {},
         -- gopls = {},
         -- rust_analyzer = {},
-        tsserver = {},
+        tsserver = {
+          filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+          init_options = {
+            plugins = {
+              {
+                name = '@vue/typescript-plugin',
+                location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
+                languages = { 'vue' },
+              },
+            },
+          },
+        },
+        volar = {},
         pyright = {
           -- settings = {
           --   pyright = {
@@ -318,7 +330,7 @@ require('lazy').setup({
       {
         '<leader>f',
         function()
-          require('conform').format { async = true, lsp_fallback = true }
+          require('conform').format { async = true, timeout_ms = 2500, lsp_fallback = true }
         end,
         mode = '',
         desc = '[F]ormat buffer',
