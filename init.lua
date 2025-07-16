@@ -64,6 +64,7 @@ vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { desc = 'move lines down', sil
 vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = 'move lines up', silent = true })
 
 vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, { desc = 'Show diagnostic floating window', noremap = true, silent = true })
+vim.keymap.set('n', '<leader>a', vim.lsp.buf.code_action, { desc = 'Show code action', noremap = true, silent = true })
 
 -- dismiss copilot with <C-c> in insert mode
 -- vim.keymap.set('i', '<C-c>', '<plug>(copilot-dismiss)<c-c>', { noremap = true, desc = 'Dismiss copilot' })
