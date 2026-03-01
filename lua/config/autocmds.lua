@@ -13,4 +13,14 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Disable line numbers in terminal mode
+vim.api.nvim_create_autocmd('TermOpen', {
+  desc = 'Disable line numbers in terminal',
+  group = vim.api.nvim_create_augroup('terminal-settings', { clear = true }),
+  callback = function()
+    vim.opt_local.number = false
+    vim.opt_local.relativenumber = false
+  end,
+})
+
 -- vim: ts=2 sts=2 sw=2 et
