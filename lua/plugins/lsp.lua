@@ -87,16 +87,14 @@ return {
       },
       volar = {},
       pyright = {
-        -- settings = {
-        --   pyright = {
-        --     disableOrganizeImports = true,
-        --   },
-        --   python = {
-        --     analysis = {
-        --       ignore = { '*' },
-        --     },
-        --   },
-        -- },
+        settings = {
+          python = {
+            analysis = {
+              -- Disable pyright diagnostics, use flake8 for linting instead
+              diagnosticMode = 'off',
+            },
+          },
+        },
       },
       -- ruff = {
       --   on_attach = function(client)
