@@ -540,6 +540,19 @@ If you had custom settings in the old `init.lua`:
 | User plugin override | `lua/custom/plugins/init.lua` | Custom plugin specs |
 | Bootstrap Lua/Vim on start | `init.lua` | Very rarely - prefer modules |
 
+## Keybindings Reference
+
+### Git Keybindings (from diffview.nvim)
+- `<leader>gd` - Open diff view for current changes
+- `<leader>gh` - Open file history
+- `<leader>gc` - Close diff view
+
+### Undo/Redo Keybindings (from undotree.nvim)
+- `<leader>u` - Toggle undo tree panel (visualize undo history)
+
+### File Management Keybindings
+- `<leader>cf` - Copy file to OS clipboard (from file-copy plugin)
+
 ---
 
 **Last Updated**: 2024  
