@@ -3,8 +3,8 @@ vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = true
 
 -- Load core configuration
-require('config')
-require('keymaps')
+require 'config'
+require 'keymaps'
 
 -- Bootstrap and setup lazy.nvim
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
