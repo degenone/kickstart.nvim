@@ -4,11 +4,21 @@ return {
   branch = '0.1.x',
   dependencies = {
     'nvim-lua/plenary.nvim',
-    { -- If encountering errors, see telescope-fzf-native README for installation instructions
+    {
       'nvim-telescope/telescope-fzf-native.nvim',
-      build = 'make',
+      build = (function()
+        if vim.fn.has 'win32' == 1 or vim.fn.has 'win64' == 1 then
+          return 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build'
+        else
+          return 'make'
+        end
+      end)(),
       cond = function()
-        return vim.fn.executable 'make' == 1
+        if vim.fn.has 'win32' == 1 or vim.fn.has 'win64' == 1 then
+          return vim.fn.executable 'cmake' == 1
+        else
+          return vim.fn.executable 'make' == 1
+        end
       end,
     },
     { 'nvim-telescope/telescope-ui-select.nvim' },
