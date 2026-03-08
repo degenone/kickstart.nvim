@@ -1,8 +1,18 @@
+-- VS Code theme
+-- https://github.com/Mofiqul/vscode.nvim
+
 return {
   'Mofiqul/vscode.nvim',
-  priority = 1000, -- Make sure to load this before all the other start plugins.
-  init = function()
-    vim.cmd.colorscheme 'vscode'
-    vim.cmd.hi 'Comment gui=none'
+  lazy = false,
+  priority = 1000,
+  config = function()
+    require('vscode').setup {
+      -- Enable transparent background
+      transparent = false,
+      -- Enable italic comment
+      italic_comments = false,
+      -- Disable nvim-tree background color
+      disable_nvimtree_bg = true,
+    }
   end,
 }

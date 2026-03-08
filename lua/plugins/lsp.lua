@@ -73,7 +73,7 @@ return {
       -- clangd = {},
       -- gopls = {},
       -- rust_analyzer = {},
-      tsserver = {
+      ts_ls = {
         filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
         init_options = {
           plugins = {
@@ -85,7 +85,7 @@ return {
           },
         },
       },
-      volar = {},
+      volar = {}, -- NOTE: Make sure vue-language-server is installed via Mason
       pyright = {
         settings = {
           python = {
@@ -105,28 +105,54 @@ return {
       -- },
       emmet_language_server = {},
       lua_ls = {
-        -- cmd = {...},
-        -- filetypes = { ...},
-        -- capabilities = {},
+        on_init = function(client)
+          if client.workspace_folders then
+            local path = client.workspace_folders[1].name
+            if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then
+              return
+            end
+          end
+
+          client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+            runtime = {
+              version = 'LuaJIT',
+              path = { 'lua/?.lua', 'lua/?/init.lua' },
+            },
+            workspace = {
+              checkThirdParty = false,
+              library = vim.tbl_extend('force', vim.api.nvim_get_runtime_file('', true), {
+                '${3rd}/luv/library',
+                '${3rd}/busted/library',
+              }),
+            },
+          })
+        end,
         settings = {
           Lua = {
             completion = {
               callSnippet = 'Replace',
             },
-            -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-            -- diagnostics = { disable = { 'missing-fields' } },
+            -- Make the language server recognize the `vim` global
+            diagnostics = {
+              globals = { 'vim', 'require' },
+            },
           },
         },
       },
     }
 
     local ensure_installed = vim.tbl_keys(servers or {})
+    -- Remove 'volar' from ensure_installed since it's not a Mason package
+    ensure_installed = vim.tbl_filter(function(name)
+      return name ~= 'volar'
+    end, ensure_installed)
     vim.list_extend(ensure_installed, {
       'stylua', -- Used to format Lua code
       'emmet_language_server', -- Used for HTML/CSS/JS/TS/... autocompletion
       'jsonlint', -- Used to lint JSON files
       'flake8', -- Used to lint Python files
       'pyright', -- Used to provide Python LSP
+      'vue-language-server', -- Used for Vue.js development
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 

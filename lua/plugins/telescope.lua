@@ -26,6 +26,26 @@ return {
   },
   config = function()
     require('telescope').setup {
+      defaults = {
+        file_ignore_patterns = { 'node_modules', '.git' },
+        preview = {
+          -- Disable treesitter highlighting in preview to avoid compatibility issues
+          -- with nvim-treesitter main branch API changes
+          treesitter = false,
+        },
+      },
+      pickers = {
+        find_files = {
+          -- Respect .gitignore
+          find_command = { 'rg', '--files', '--hidden', '--glob', '!.git' },
+        },
+        live_grep = {
+          -- Respect .gitignore
+          additional_args = function()
+            return { '--hidden' }
+          end,
+        },
+      },
       extensions = {
         ['ui-select'] = {
           require('telescope.themes').get_dropdown(),
@@ -65,5 +85,31 @@ return {
     vim.keymap.set('n', '<leader>sn', function()
       builtin.find_files { cwd = vim.fn.stdpath 'config' }
     end, { desc = '[S]earch [N]eovim files' })
+
+    -- LSP keymaps via Telescope (from master branch)
+    vim.api.nvim_create_autocmd('LspAttach', {
+      group = vim.api.nvim_create_augroup('telescope-lsp-attach', { clear = true }),
+      callback = function(event)
+        local buf = event.buf
+
+        -- Find references for the word under your cursor.
+        vim.keymap.set('n', 'grr', builtin.lsp_references, { buffer = buf, desc = '[G]oto [R]eferences' })
+
+        -- Jump to the implementation of the word under your cursor.
+        vim.keymap.set('n', 'gri', builtin.lsp_implementations, { buffer = buf, desc = '[G]oto [I]mplementation' })
+
+        -- Jump to the definition of the word under your cursor.
+        vim.keymap.set('n', 'grd', builtin.lsp_definitions, { buffer = buf, desc = '[G]oto [D]efinition' })
+
+        -- Fuzzy find all the symbols in your current document.
+        vim.keymap.set('n', 'gO', builtin.lsp_document_symbols, { buffer = buf, desc = 'Open Document Symbols' })
+
+        -- Fuzzy find all the symbols in your current workspace.
+        vim.keymap.set('n', 'gW', builtin.lsp_dynamic_workspace_symbols, { buffer = buf, desc = 'Open Workspace Symbols' })
+
+        -- Jump to the type of the word under your cursor.
+        vim.keymap.set('n', 'grt', builtin.lsp_type_definitions, { buffer = buf, desc = '[G]oto [T]ype Definition' })
+      end,
+    })
   end,
 }
