@@ -20,3 +20,9 @@ vim.keymap.set('n', '<A-k>', ':m .-2<CR>==', { desc = 'move line up', silent = t
 vim.keymap.set('n', '<A-j>', ':m .+1<CR>==', { desc = 'move line down', silent = true })
 vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { desc = 'move lines down', silent = true })
 vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = 'move lines up', silent = true })
+
+-- Line movement
+vim.keymap.set('n', '<leader>,', '_', { desc = 'move to the start of a line', silent = true })
+vim.keymap.set('n', '<leader>.', '$', { desc = 'move to the end of a line', silent = true })
+vim.keymap.set('v', '<leader>,', '_', { desc = 'move to the start of a line', silent = true })
+vim.keymap.set('v', '<leader>.', '$', { desc = 'move to the end of a line', silent = true })
