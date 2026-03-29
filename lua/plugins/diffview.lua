@@ -1,5 +1,5 @@
 return {
-  'sindrets/diffview.nvim',
+  'dlyongemallo/diffview.nvim',
   dependencies = { 'nvim-lua/plenary.nvim' },
   cmd = { 'DiffviewOpen', 'DiffviewFileHistory', 'DiffviewClose' },
   keys = {
@@ -8,7 +8,7 @@ return {
     { '<leader>gc', ':DiffviewClose<CR>', desc = 'Close diff view' },
   },
   config = function()
-    require('diffview').setup({
+    require('diffview').setup {
       diff_binaries = false,
       enhanced_diff_hl = true,
       auto_refresh = true,
@@ -25,6 +25,6 @@ return {
         position = 'bottom',
         height = 16,
       },
-    })
+    }
   end,
 }
