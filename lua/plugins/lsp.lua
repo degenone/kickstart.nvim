@@ -69,12 +69,35 @@ return {
 
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+    local has_gopls = vim.fn.executable 'gopls' == 1
     local servers = {
       -- clangd = {},
-      -- gopls = {},
+      gopls = {
+        settings = {
+          gopls = {
+            analyses = {
+              unusedparams = true,
+            },
+            staticcheck = true,
+            gofumpt = true,
+          },
+        },
+      },
       -- rust_analyzer = {},
       ts_ls = {
         filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+        init_options = {
+          plugins = {
+            {
+              name = '@vue/typescript-plugin',
+              location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
+              languages = { 'vue' },
+            },
+          },
+        },
+      },
+      vue_ls = {
+        filetypes = { 'vue' },
         init_options = {
           plugins = {
             {
@@ -144,6 +167,9 @@ return {
     local ensure_installed = vim.tbl_keys(servers or {})
     -- Remove 'volar' from ensure_installed since it's not a Mason package
     ensure_installed = vim.tbl_filter(function(name)
+      if name == 'gopls' and has_gopls then
+        return false -- Don't let Mason install it if we already have it
+      end
       return name ~= 'volar'
     end, ensure_installed)
     vim.list_extend(ensure_installed, {
@@ -159,11 +185,25 @@ return {
     require('mason-lspconfig').setup {
       handlers = {
         function(server_name)
+          if server_name == 'gopls' and has_gopls then
+            return
+          end
+
           local server = servers[server_name] or {}
           server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
           require('lspconfig')[server_name].setup(server)
         end,
       },
     }
+
+    if has_gopls then
+      local gopls_settings = (servers.gopls or {}).settings or {} -- Safe access
+      vim.lsp.config('gopls', {
+        cmd = { 'gopls' },
+        capabilities = capabilities,
+        settings = gopls_settings,
+      })
+      vim.lsp.enable 'gopls'
+    end
   end,
 }
