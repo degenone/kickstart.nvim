@@ -185,6 +185,9 @@ return {
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
     require('mason-lspconfig').setup {
+      automatic_enable = {
+        exclude = { 'roslyn_ls' },
+      },
       handlers = {
         function(server_name)
           if server_name == 'gopls' and has_gopls then
