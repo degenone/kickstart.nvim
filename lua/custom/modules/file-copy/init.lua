@@ -1,7 +1,7 @@
 local M = {}
 
 local function get_os_name()
-  return vim.loop.os_uname().sysname
+  return vim.uv.os_uname().sysname
 end
 
 local function is_path_valid(path)
