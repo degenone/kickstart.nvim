@@ -86,13 +86,14 @@ return {
       },
       -- rust_analyzer = {},
       ts_ls = {
-        filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+        filetypes = { 'typescript', 'javascript', 'javascriptreact', 'javascript.jsx', 'typescriptreact', 'typescript.tsx', 'vue' },
         init_options = {
           plugins = {
             {
               name = '@vue/typescript-plugin',
               location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
               languages = { 'vue' },
+              configNamespace = 'typescript',
             },
           },
         },
@@ -108,19 +109,7 @@ return {
           },
         },
       },
-      vue_ls = {
-        filetypes = { 'vue' },
-        init_options = {
-          plugins = {
-            {
-              name = '@vue/typescript-plugin',
-              location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
-              languages = { 'vue' },
-            },
-          },
-        },
-      },
-      volar = {}, -- NOTE: Make sure vue-language-server is installed via Mason
+      vue_ls = {}, -- Vue Language Tools handles TypeScript forwarding on current versions
       pyright = {
         settings = {
           python = {
