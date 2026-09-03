@@ -22,6 +22,16 @@ require('lazy').setup({
   { import = 'plugins' },
   { import = 'custom.plugins' },
 }, {
+  pkg = {
+    -- Do not resolve plugin rockspecs; this setup uses Git plugins and
+    -- Windows-native tools instead of LuaRocks.
+    sources = { 'lazy', 'packspec' },
+  },
+  rocks = {
+    -- Keep plugin installation self-contained on Windows; rest.nvim's core
+    -- HTTP client uses curl and does not require LuaRocks.
+    enabled = false,
+  },
   ui = {
     icons = vim.g.have_nerd_font and {} or {
       cmd = '⌘',
