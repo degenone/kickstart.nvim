@@ -188,19 +188,17 @@ return {
       automatic_enable = {
         exclude = { 'roslyn_ls' },
       },
-      handlers = {
-        function(server_name)
-          if server_name == 'gopls' and has_gopls then
-            return
-          end
-
-          local server = servers[server_name] or {}
-          server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-          vim.lsp.config(server_name, server)
-          vim.lsp.enable(server_name)
-        end,
-      },
     }
+
+    -- Configure the servers explicitly. mason-lspconfig v2 no longer applies
+    -- the old `handlers` setup mechanism used by earlier configurations.
+    for server_name, server in pairs(servers) do
+      if not (server_name == 'gopls' and has_gopls) then
+        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+        vim.lsp.config(server_name, server)
+        vim.lsp.enable(server_name)
+      end
+    end
 
     if has_gopls then
       local gopls_settings = (servers.gopls or {}).settings or {} -- Safe access
