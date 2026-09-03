@@ -6,6 +6,7 @@ return {
     'WhoIsSethDaniel/mason-tool-installer.nvim',
     { 'j-hui/fidget.nvim', opts = {} },
     'hrsh7th/cmp-nvim-lsp',
+    { 'seblyng/roslyn.nvim', opts = {} },
   },
   config = function()
     vim.api.nvim_create_autocmd('LspAttach', {
@@ -96,6 +97,17 @@ return {
           },
         },
       },
+      roslyn = {
+        settings = {
+          ['csharp|completion'] = {
+            dotnet_show_name_completion_suggestions = true,
+            dotnet_show_completion_items_from_unimported_namespaces = true,
+          },
+          ['csharp|code_lens'] = {
+            dotnet_enable_references_code_lens = true,
+          },
+        },
+      },
       vue_ls = {
         filetypes = { 'vue' },
         init_options = {
@@ -179,6 +191,7 @@ return {
       'flake8', -- Used to lint Python files
       'pyright', -- Used to provide Python LSP
       'vue-language-server', -- Used for Vue.js development
+      'roslyn-language-server', -- Used for C# development
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 

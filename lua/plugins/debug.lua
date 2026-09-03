@@ -95,6 +95,7 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'coreclr',
       },
     }
 
@@ -135,6 +136,27 @@ return {
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
+
+    -- Configure the .NET Core debug adapter installed by Mason.
+    -- On Windows, netcoredbg is more reliable when it is not detached.
+    dap.adapters.coreclr = {
+      type = 'executable',
+      command = vim.fn.exepath 'netcoredbg',
+      args = { '--interpreter=vscode' },
+      options = { detached = false },
+    }
+
+    dap.configurations.cs = {
+      {
+        type = 'coreclr',
+        name = 'Launch .NET project',
+        request = 'launch',
+        cwd = '${workspaceFolder}',
+        program = function()
+          return vim.fn.input('Path to .NET DLL: ', vim.fn.getcwd() .. '/bin/Debug/', 'file')
+        end,
+      },
+    }
 
     -- Install golang specific config
     require('dap-go').setup {
