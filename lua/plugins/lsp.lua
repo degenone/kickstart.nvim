@@ -171,7 +171,7 @@ return {
       if name == 'gopls' and has_gopls then
         return false -- Don't let Mason install it if we already have it
       end
-      return name ~= 'volar'
+      return name ~= 'volar' and name ~= 'roslyn'
     end, ensure_installed)
     vim.list_extend(ensure_installed, {
       'stylua', -- Used to format Lua code
