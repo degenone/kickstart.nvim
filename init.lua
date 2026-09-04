@@ -2,6 +2,21 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = true
 
+-- Make user-installed Lua 5.1 rocks available to Neovim. This is used by
+-- rest.nvim for optional XML and external-body support on Windows.
+if vim.fn.has 'win32' == 1 and vim.env.APPDATA then
+  local luarocks = vim.fs.joinpath(vim.env.APPDATA, 'luarocks')
+  package.path = table.concat({
+    package.path,
+    vim.fs.joinpath(luarocks, 'share', 'lua', '5.1', '?.lua'),
+    vim.fs.joinpath(luarocks, 'share', 'lua', '5.1', '?', 'init.lua'),
+  }, ';')
+  package.cpath = table.concat({
+    package.cpath,
+    vim.fs.joinpath(luarocks, 'lib', 'lua', '5.1', '?.dll'),
+  }, ';')
+end
+
 -- Load core configuration
 require 'config'
 require 'keymaps'
