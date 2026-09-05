@@ -146,14 +146,6 @@ return {
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
-    -- netcoredbg on Windows can advertise configurationDone but reject the
-    -- request with E_ACCESSDENIED after the debuggee has already started.
-    dap.listeners.before.event_initialized['coreclr_config_done'] = function(session)
-      if session.config.type == 'coreclr' then
-        session.capabilities.supportsConfigurationDoneRequest = false
-      end
-    end
-
     -- Configure the .NET Core debug adapter installed by Mason.
     -- On Windows, netcoredbg is more reliable when it is not detached.
     if vim.fn.has 'win32' == 1 then
