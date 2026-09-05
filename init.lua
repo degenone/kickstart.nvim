@@ -17,25 +17,14 @@ if vim.fn.has 'win32' == 1 and vim.env.APPDATA then
   }, ';')
 end
 
--- Populate the native vim.pack tree while Lazy remains the active loader.
-require('config.pack').install()
+-- Install and load plugins with the native package manager.
+require('config.pack').setup()
 
 -- Load core configuration
 require 'config'
 require 'keymaps'
 
--- Bootstrap and setup lazy.nvim
-local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
-if not vim.uv.fs_stat(lazypath) then
-  local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
-  local out = vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
-  if vim.v.shell_error ~= 0 then
-    error('Error cloning lazy.nvim:\n' .. out)
-  end
-end
-vim.opt.rtp:prepend(lazypath)
-
--- Load all plugin specs and setup lazy
+--[[ Load all plugin specs and setup lazy
 require('lazy').setup({
   { import = 'plugins' },
   { import = 'custom.plugins' },
@@ -67,6 +56,6 @@ require('lazy').setup({
       lazy = '💤 ',
     },
   },
-})
+}) ]]
 
 -- vim: ts=2 sts=2 sw=2 et
