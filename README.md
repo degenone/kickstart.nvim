@@ -1,14 +1,10 @@
-# kickstart.nvim
+# Personal Neovim configuration
 
 ## Introduction
 
-A starting point for Neovim that is:
-
-* Small
-* Single-file
-* Completely Documented
-
-**NOT** a Neovim distribution, but instead a starting point for your configuration.
+A modular Neovim configuration based on kickstart.nvim, using native `vim.pack`
+for plugin installation and locking. It includes TypeScript/Vue, C#/.NET with
+DAP, and REST request workflows.
 
 ## Installation
 
@@ -97,8 +93,9 @@ Start Neovim
 nvim
 ```
 
-That's it! Lazy will install all the plugins you have. Use `:Lazy` to view
-current plugin status.
+That's it! Neovim installs the locked plugins on first start. Use
+`:lua vim.pack.get()` to inspect packages, `:PackUpdate` to update them, and
+`:PackBuild` to build supported native dependencies.
 
 Read through the `init.lua` file in your configuration folder for more
 information about extending and exploring Neovim.
@@ -117,8 +114,8 @@ NOTE: You'll need to uncomment the line in the init.lua that turns on loading cu
   <summary>Adding autopairs</summary>
 
 This will automatically install [windwp/nvim-autopairs](https://github.com/windwp/nvim-autopairs)
-and enable it on startup. For more information, see documentation for
-[lazy.nvim](https://github.com/folke/lazy.nvim).
+and enable it on startup. Add its source to `lua/config/pack.lua`, then put its
+configuration in `lua/plugins/` as described in [doc/CONFIG.md](doc/CONFIG.md).
 
 In the file: `lua/custom/plugins/autopairs.lua`, add:
 
@@ -193,7 +190,8 @@ return {
     `~/.local/share/nvim-kickstart`. You can apply this approach to any Neovim
     distribution that you would like to try out.
 * What if I want to "uninstall" this configuration:
-  * See [lazy.nvim uninstall](https://github.com/folke/lazy.nvim#-uninstalling) information
+  * Remove its directory and the matching Neovim data directory. See `:help vim.pack`
+    if you want to remove individual native packages first.
 * Why is the kickstart `init.lua` a single file? Wouldn't it make sense to split it into multiple files?
   * The main purpose of kickstart is to serve as a teaching tool and a reference
     configuration that someone can easily use to `git clone` as a basis for their own.

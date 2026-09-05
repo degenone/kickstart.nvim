@@ -1,8 +1,16 @@
--- Return custom plugin specs for lazy.nvim
-return {
+-- Custom plugins that live outside this repository are optional. Set
+-- NVIM_CODE_ASSISTANT_DIR to their absolute path on any machine that has them.
+local plugins = {
   require 'custom.plugins.file-copy',
-  {
-    dir = 'D:\\learn-lua\\plugin',
+}
+
+local code_assistant_dir = vim.env.NVIM_CODE_ASSISTANT_DIR
+if not code_assistant_dir and vim.fn.has('win32') == 1 then
+  code_assistant_dir = 'D:\\learn-lua\\plugin'
+end
+if code_assistant_dir and vim.uv.fs_stat(code_assistant_dir) then
+  plugins[#plugins + 1] = {
+    dir = code_assistant_dir,
     name = 'code_assistant',
     dependencies = { 'nvim-lua/plenary.nvim' },
     config = function()
@@ -13,5 +21,7 @@ return {
         keep_warm = false,
       }
     end,
-  },
-}
+  }
+end
+
+return plugins

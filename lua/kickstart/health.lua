@@ -21,7 +21,7 @@ end
 
 local check_external_reqs = function()
   -- Tools used by plugin installation, formatting, REST, LSP, and DAP.
-  for _, exe in ipairs { 'git', 'make', 'unzip', 'rg', 'curl', 'node', 'npm', 'dotnet', 'prettier', 'luarocks' } do
+  for _, exe in ipairs { 'git', 'make', 'unzip', 'rg', 'curl', 'node', 'npm', 'dotnet', 'prettier', 'luarocks', 'cmake' } do
     local is_executable = vim.fn.executable(exe) == 1
     if is_executable then
       vim.health.ok(string.format("Found executable: '%s'", exe))

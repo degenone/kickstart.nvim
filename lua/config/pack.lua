@@ -7,8 +7,8 @@ local function github(repo, version)
   }
 end
 
--- Native vim.pack manifest. Loading remains disabled during this first step;
--- Lazy continues to provide the current runtime while the pack tree is built.
+-- Native vim.pack manifest. Packages are loaded before their configuration so
+-- plugin modules and dependencies are available during startup.
 M.specs = {
   github('windwp/nvim-autopairs'),
   github('catppuccin/nvim'),
@@ -57,6 +57,67 @@ M.specs = {
 
 function M.install()
   vim.pack.add(M.specs, { confirm = false, load = true })
+end
+
+local function plugin_path(name)
+  local plugin = vim.pack.get({ name })[1]
+  return plugin and plugin.path or nil
+end
+
+local function run(command, opts)
+  local result = vim.system(command, vim.tbl_extend('force', { text = true }, opts or {})):wait()
+  if result.code == 0 then return true end
+
+  local output = vim.trim((result.stderr or '') .. '\n' .. (result.stdout or ''))
+  vim.notify(('Command failed: %s\n%s'):format(table.concat(command, ' '), output), vim.log.levels.ERROR)
+  return false
+end
+
+function M.build_fzf()
+  local path = plugin_path 'telescope-fzf-native.nvim'
+  if not path then
+    vim.notify('telescope-fzf-native.nvim is not installed.', vim.log.levels.WARN)
+    return false
+  end
+
+  local library = vim.fs.joinpath(path, 'build', vim.fn.has('win32') == 1 and 'libfzf.dll' or 'libfzf.so')
+  if vim.uv.fs_stat(library) then return true end
+
+  if vim.fn.executable 'cmake' ~= 1 then
+    vim.notify('CMake is required to build telescope-fzf-native.nvim. Install it, then run :PackBuild fzf.', vim.log.levels.WARN)
+    return false
+  end
+
+  local commands = {
+    { 'cmake', '-S', '.', '-B', 'build', '-DCMAKE_BUILD_TYPE=Release' },
+    { 'cmake', '--build', 'build', '--config', 'Release' },
+    { 'cmake', '--install', 'build', '--prefix', 'build' },
+  }
+  for _, command in ipairs(commands) do
+    if not run(command, { cwd = path }) then return false end
+  end
+  return true
+end
+
+function M.build(name)
+  if not name or name == '' or name == 'fzf' then return M.build_fzf() end
+  vim.notify(('Unknown package build target: %s'):format(name), vim.log.levels.ERROR)
+  return false
+end
+
+local function setup_commands()
+  vim.api.nvim_create_user_command('PackBuild', function(args)
+    M.build(args.args)
+  end, {
+    force = true,
+    nargs = '?',
+    complete = function() return { 'fzf' } end,
+    desc = 'Build native vim.pack dependencies',
+  })
+
+  vim.api.nvim_create_user_command('PackUpdate', function()
+    vim.pack.update()
+  end, { desc = 'Update vim.pack packages', force = true })
 end
 
 local plugin_modules = {
@@ -149,6 +210,8 @@ end
 
 function M.setup()
   M.install()
+  setup_commands()
+  M.build_fzf()
 
   local configured = {}
   for _, module_name in ipairs(plugin_modules) do
@@ -158,7 +221,7 @@ function M.setup()
     end
     if module_name == 'custom.plugins.init' then
       for _, custom_spec in ipairs(spec) do
-        if custom_spec.dir and custom_spec.dir ~= vim.fn.stdpath 'config' .. '/lua/custom/modules/file-copy' then
+        if custom_spec.dir and vim.uv.fs_stat(custom_spec.dir) and custom_spec.dir ~= vim.fn.stdpath 'config' .. '/lua/custom/modules/file-copy' then
           vim.opt.rtp:prepend(custom_spec.dir)
         end
         if type(custom_spec.config) == 'function' then
