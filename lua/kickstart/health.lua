@@ -20,8 +20,8 @@ local check_version = function()
 end
 
 local check_external_reqs = function()
-  -- Basic utils: `git`, `make`, `unzip`
-  for _, exe in ipairs { 'git', 'make', 'unzip', 'rg' } do
+  -- Tools used by plugin installation, formatting, REST, LSP, and DAP.
+  for _, exe in ipairs { 'git', 'make', 'unzip', 'rg', 'curl', 'node', 'npm', 'dotnet', 'prettier', 'luarocks' } do
     local is_executable = vim.fn.executable(exe) == 1
     if is_executable then
       vim.health.ok(string.format("Found executable: '%s'", exe))

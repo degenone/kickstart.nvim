@@ -1,6 +1,5 @@
 -- Config initialization - require all config submodules
 
-require('config.platform')
 require('config.settings')
 require('config.autocmds')
 

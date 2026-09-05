@@ -155,14 +155,15 @@ return {
 
     local netcoredbg = vim.fn.exepath 'netcoredbg'
     if netcoredbg == '' then
-      netcoredbg = vim.fs.joinpath(vim.fn.stdpath 'data', 'mason', 'packages', 'netcoredbg', 'netcoredbg', 'netcoredbg.exe')
+      local executable = vim.fn.has 'win32' == 1 and 'netcoredbg.exe' or 'netcoredbg'
+      netcoredbg = vim.fs.joinpath(vim.fn.stdpath 'data', 'mason', 'packages', 'netcoredbg', 'netcoredbg', executable)
     end
 
     dap.adapters.coreclr = {
       type = 'executable',
       command = netcoredbg,
       args = { '--interpreter=vscode' },
-      options = { detached = false },
+      options = { detached = vim.fn.has 'win32' == 1 and false or true },
     }
 
     dap.configurations.cs = {

@@ -103,6 +103,11 @@ current plugin status.
 Read through the `init.lua` file in your configuration folder for more
 information about extending and exploring Neovim.
 
+### Workflow references
+
+See [REST and DAP workflows](doc/WORKFLOWS.md) for reminders about REST
+environments, request execution, response panes, and C# debugging.
+
 
 #### Examples of adding popularly requested plugins
 
