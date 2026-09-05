@@ -17,6 +17,9 @@ if vim.fn.has 'win32' == 1 and vim.env.APPDATA then
   }, ';')
 end
 
+-- Populate the native vim.pack tree while Lazy remains the active loader.
+require('config.pack').install()
+
 -- Load core configuration
 require 'config'
 require 'keymaps'
