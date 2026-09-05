@@ -18,12 +18,16 @@ return {
         },
       },
       file_panel = {
-        position = 'left',
-        width = 35,
+        win_config = {
+          position = 'left',
+          width = 35,
+        },
       },
       file_history_panel = {
-        position = 'bottom',
-        height = 16,
+        win_config = {
+          position = 'bottom',
+          height = 16,
+        },
       },
     }
   end,

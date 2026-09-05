@@ -148,9 +148,14 @@ return {
 
     -- Configure the .NET Core debug adapter installed by Mason.
     -- On Windows, netcoredbg is more reliable when it is not detached.
+    local netcoredbg = vim.fn.exepath 'netcoredbg'
+    if netcoredbg == '' then
+      netcoredbg = vim.fs.joinpath(vim.fn.stdpath 'data', 'mason', 'packages', 'netcoredbg', 'netcoredbg', 'netcoredbg.exe')
+    end
+
     dap.adapters.coreclr = {
       type = 'executable',
-      command = vim.fn.exepath 'netcoredbg',
+      command = netcoredbg,
       args = { '--interpreter=vscode' },
       options = { detached = false },
     }
