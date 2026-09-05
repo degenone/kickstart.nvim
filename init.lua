@@ -1,6 +1,9 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = true
+-- Keep :compiler dotnet from parsing the same diagnostics from the build
+-- summary a second time.
+vim.g.dotnet_errors_only = true
 
 -- Set platform paths before vim.pack loads plugins with external dependencies.
 require('config.platform')
