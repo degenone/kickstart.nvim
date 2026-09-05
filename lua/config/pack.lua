@@ -133,6 +133,18 @@ local function configure_spec(spec, configured)
     local module = spec.main or main_modules[name]
     if module then require(module).setup(spec.opts) end
   end
+
+  for _, key in ipairs(spec.keys or {}) do
+    local lhs, rhs = key[1], key[2]
+    if lhs and rhs then
+      local opts = vim.tbl_extend('force', {}, key)
+      opts[1] = nil
+      opts[2] = nil
+      local mode = opts.mode or 'n'
+      opts.mode = nil
+      vim.keymap.set(mode, lhs, rhs, opts)
+    end
+  end
 end
 
 function M.setup()
