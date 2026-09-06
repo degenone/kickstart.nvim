@@ -1,4 +1,5 @@
 local M = {}
+M.paths = {}
 
 local function github(repo, version)
   return {
@@ -7,8 +8,8 @@ local function github(repo, version)
   }
 end
 
--- Native vim.pack manifest. Packages are loaded before their configuration so
--- plugin modules and dependencies are available during startup.
+-- Native vim.pack manifest. Packages are registered at startup and loaded when
+-- their configuration or lazy trigger requires them.
 M.specs = {
   github('windwp/nvim-autopairs'),
   github('catppuccin/nvim'),
@@ -45,7 +46,7 @@ M.specs = {
   github('nvim-tree/nvim-web-devicons'),
   github('MunifTanjim/nui.nvim'),
   github('rest-nvim/rest.nvim'),
-  github('nvim-telescope/telescope.nvim', '0.1.x'),
+  github('nvim-telescope/telescope.nvim', 'v0.2.1'),
   github('nvim-telescope/telescope-fzf-native.nvim'),
   github('nvim-telescope/telescope-ui-select.nvim'),
   github('folke/todo-comments.nvim'),
@@ -56,10 +57,18 @@ M.specs = {
 }
 
 function M.install()
-  vim.pack.add(M.specs, { confirm = false, load = true })
+  -- Register packages first. Individual specs are loaded below according to
+  -- their event, filetype, command, and key triggers.
+  vim.pack.add(M.specs, {
+    confirm = false,
+    -- A no-op loader registers installed packages without `:packadd!`, whose
+    -- runtimepath entries would otherwise be sourced later during startup.
+    load = function(data) M.paths[data.spec.name] = data.path end,
+  })
 end
 
 local function plugin_path(name)
+  if M.paths[name] then return M.paths[name] end
   local plugin = vim.pack.get({ name })[1]
   return plugin and plugin.path or nil
 end
@@ -162,39 +171,167 @@ local main_modules = {
 }
 
 local function plugin_name(spec)
-  if type(spec) ~= 'table' or type(spec[1]) ~= 'string' then return nil end
-  return spec[1]:match '/([^/]+)$'
+  local source = type(spec) == 'string' and spec or type(spec) == 'table' and spec[1] or nil
+  return type(source) == 'string' and source:match '/([^/]+)$' or nil
 end
 
-local function configure_spec(spec, configured)
-  if type(spec) ~= 'table' then return end
+local configured = {}
+local configuring = {}
+local loaded = {}
+local pending_after = {}
+local force_after_scripts = false
 
-  -- Some spec files return a list of plugin specs rather than one spec.
+local function load_plugin(name)
+  if not name or loaded[name] then return end
+  vim.cmd.packadd { name, bang = false }
+  loaded[name] = true
+
+  -- :packadd only sources plugin/ files. Packages loaded after startup also
+  -- need their after/plugin scripts sourced explicitly. Batch these until the
+  -- complete dependency tree is on runtimepath.
+  if force_after_scripts then pending_after[#pending_after + 1] = name end
+end
+
+local function source_pending_after()
+  local names = pending_after
+  pending_after = {}
+  for _, name in ipairs(names) do
+    local path = plugin_path(name)
+    local after_files = path and vim.fn.glob(vim.fs.joinpath(path, 'after', 'plugin', '**', '*.{vim,lua}'), false, true) or {}
+    for _, file in ipairs(after_files) do
+      vim.cmd.source { file, magic = { file = false } }
+    end
+  end
+end
+
+local configure_spec
+
+local function load_spec_tree(spec, seen)
+  seen = seen or {}
+  if type(spec) == 'string' then
+    load_plugin(plugin_name(spec))
+    return
+  end
+  if type(spec) ~= 'table' or spec.enabled == false then return end
   if type(spec[1]) == 'table' then
     for _, child in ipairs(spec) do
-      configure_spec(child, configured)
+      load_spec_tree(child, seen)
     end
     return
   end
 
+  local name = plugin_name(spec)
+  if not name or seen[name] then return end
+  seen[name] = true
   for _, dependency in ipairs(spec.dependencies or {}) do
-    configure_spec(dependency, configured)
+    load_spec_tree(dependency, seen)
+  end
+  load_plugin(name)
+end
+
+local function configure_dependency(dependency)
+  if type(dependency) == 'table' then
+    configure_spec(dependency)
+  else
+    load_plugin(plugin_name(dependency))
+  end
+end
+
+configure_spec = function(spec)
+  if type(spec) == 'string' then
+    configure_dependency(spec)
+    return
+  end
+  if type(spec) ~= 'table' or spec.enabled == false then return end
+
+  -- Some spec files return a list of plugin specs rather than one spec.
+  if type(spec[1]) == 'table' then
+    for _, child in ipairs(spec) do
+      configure_spec(child)
+    end
+    return
   end
 
   local name = plugin_name(spec)
-  if not name or configured[name] then return end
-  configured[name] = true
+  if not name or configured[name] or configuring[name] then return end
+  configuring[name] = true
 
-  if type(spec.config) == 'function' then
-    spec.config()
-  elseif spec.config == true then
-    local module = main_modules[name]
-    if module then require(module).setup() end
-  elseif spec.opts then
-    local module = spec.main or main_modules[name]
-    if module then require(module).setup(spec.opts) end
+  -- Source the complete package tree first. Some dependency setup callbacks
+  -- call into their parent package (friendly-snippets -> LuaSnip), while other
+  -- parents inspect dependencies as they are sourced (rest.nvim -> nvim-nio).
+  load_spec_tree(spec)
+  source_pending_after()
+
+  for _, dependency in ipairs(spec.dependencies or {}) do
+    configure_dependency(dependency)
   end
 
+  local ok, err = xpcall(function()
+    if type(spec.config) == 'function' then
+      spec.config()
+    elseif spec.config == true then
+      local module = main_modules[name]
+      if module then require(module).setup() end
+    elseif spec.opts then
+      local module = spec.main or main_modules[name]
+      if module then require(module).setup(spec.opts) end
+    end
+
+    for _, key in ipairs(spec.keys or {}) do
+      local lhs, rhs = key[1], key[2]
+      if lhs and rhs then
+        local opts = vim.tbl_extend('force', {}, key)
+        opts[1] = nil
+        opts[2] = nil
+        local mode = opts.mode or 'n'
+        opts.mode = nil
+        vim.keymap.set(mode, lhs, rhs, opts)
+      end
+    end
+  end, debug.traceback)
+
+  configuring[name] = nil
+  if not ok then error(err) end
+  configured[name] = true
+end
+
+local function activate_spec(spec, source_after_scripts)
+  local previous = force_after_scripts
+  force_after_scripts = previous or source_after_scripts
+  local ok, err = xpcall(function() configure_spec(spec) end, debug.traceback)
+  force_after_scripts = previous
+  if not ok then error(err) end
+end
+
+local function command_list(commands)
+  if type(commands) == 'string' then return { commands } end
+  return commands or {}
+end
+
+local function register_lazy_commands(spec)
+  local commands = command_list(spec.cmd)
+  for _, command in ipairs(commands) do
+    vim.api.nvim_create_user_command(command, function(args)
+      -- Plugin command definitions cannot replace our stubs, so remove every
+      -- stub owned by this spec before sourcing the package.
+      for _, sibling in ipairs(commands) do
+        pcall(vim.api.nvim_del_user_command, sibling)
+      end
+      activate_spec(spec, true)
+
+      local invocation = command .. (args.bang and '!' or '')
+      if args.args ~= '' then invocation = invocation .. ' ' .. args.args end
+      vim.cmd(invocation)
+    end, {
+      bang = true,
+      nargs = '*',
+      desc = ('Load %s and run :%s'):format(plugin_name(spec), command),
+      force = true,
+    })
+  end
+end
+
+local function register_lazy_keys(spec)
   for _, key in ipairs(spec.keys or {}) do
     local lhs, rhs = key[1], key[2]
     if lhs and rhs then
@@ -203,9 +340,73 @@ local function configure_spec(spec, configured)
       opts[2] = nil
       local mode = opts.mode or 'n'
       opts.mode = nil
-      vim.keymap.set(mode, lhs, rhs, opts)
+      vim.keymap.set(mode, lhs, function()
+        activate_spec(spec, true)
+        if type(rhs) == 'function' then
+          rhs()
+        else
+          local keys = vim.api.nvim_replace_termcodes(rhs, true, false, true)
+          vim.api.nvim_feedkeys(keys, 'm', false)
+        end
+      end, opts)
     end
   end
+end
+
+local function register_lazy_events(spec)
+  if spec.event then
+    vim.api.nvim_create_autocmd(spec.event, {
+      once = true,
+      callback = function(args)
+        if args.event == 'VimEnter' then
+          vim.schedule(function() activate_spec(spec, true) end)
+        else
+          activate_spec(spec, vim.v.vim_did_enter == 1)
+        end
+      end,
+      desc = 'Load ' .. plugin_name(spec),
+    })
+  end
+  if spec.ft then
+    local filetypes = type(spec.ft) == 'table' and spec.ft or { spec.ft }
+
+    -- Resolve the prospective filetype before the regular FileType event so
+    -- packages that ship ftplugin/ files are already on runtimepath.
+    vim.api.nvim_create_autocmd({ 'BufReadPre', 'BufNewFile' }, {
+      callback = function(args)
+        local filetype = vim.filetype.match { buf = args.buf, filename = args.file }
+        if filetype and vim.tbl_contains(filetypes, filetype) then activate_spec(spec, vim.v.vim_did_enter == 1) end
+      end,
+      desc = 'Preload ' .. plugin_name(spec) .. ' for matching filetypes',
+    })
+
+    vim.api.nvim_create_autocmd('FileType', {
+      pattern = filetypes,
+      once = true,
+      callback = function() activate_spec(spec, vim.v.vim_did_enter == 1) end,
+      desc = 'Load ' .. plugin_name(spec),
+    })
+  end
+end
+
+local function setup_spec(spec)
+  if type(spec) ~= 'table' or spec.enabled == false then return end
+  if type(spec[1]) == 'table' then
+    for _, child in ipairs(spec) do
+      setup_spec(child)
+    end
+    return
+  end
+
+  local is_lazy = spec.lazy ~= false and (spec.event ~= nil or spec.ft ~= nil or spec.cmd ~= nil)
+  if not is_lazy then
+    configure_spec(spec)
+    return
+  end
+
+  register_lazy_commands(spec)
+  register_lazy_keys(spec)
+  register_lazy_events(spec)
 end
 
 function M.setup()
@@ -213,24 +414,29 @@ function M.setup()
   setup_commands()
   M.build_fzf()
 
-  local configured = {}
+  local plugin_specs = {}
+  local custom_specs = {}
   for _, module_name in ipairs(plugin_modules) do
     local ok, spec = pcall(require, module_name)
     if not ok then
       error(('Could not load plugin specification %s: %s'):format(module_name, spec))
     end
     if module_name == 'custom.plugins.init' then
-      for _, custom_spec in ipairs(spec) do
-        if custom_spec.dir and vim.uv.fs_stat(custom_spec.dir) and custom_spec.dir ~= vim.fn.stdpath 'config' .. '/lua/custom/modules/file-copy' then
-          vim.opt.rtp:prepend(custom_spec.dir)
-        end
-        if type(custom_spec.config) == 'function' then
-          custom_spec.config()
-        end
-      end
+      custom_specs = spec
     else
-      configure_spec(spec, configured)
+      plugin_specs[#plugin_specs + 1] = spec
     end
+  end
+
+  for _, spec in ipairs(plugin_specs) do
+    setup_spec(spec)
+  end
+
+  for _, custom_spec in ipairs(custom_specs) do
+    if custom_spec.dir and vim.uv.fs_stat(custom_spec.dir) and custom_spec.dir ~= vim.fn.stdpath 'config' .. '/lua/custom/modules/file-copy' then
+      vim.opt.rtp:prepend(custom_spec.dir)
+    end
+    if type(custom_spec.config) == 'function' then custom_spec.config() end
   end
 end
 

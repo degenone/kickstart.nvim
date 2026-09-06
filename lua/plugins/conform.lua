@@ -1,6 +1,7 @@
 return {
   'stevearc/conform.nvim',
-  event = { 'BufWritePre' },
+  -- Load before the first save so format-on-save applies immediately.
+  event = { 'BufReadPost', 'BufNewFile' },
   cmd = { 'ConformInfo' },
   keys = {
     {

@@ -1,6 +1,7 @@
 return {
   'hrsh7th/nvim-cmp',
-  event = 'InsertEnter',
+  -- Initialize after the UI appears so completion is ready before first insert.
+  event = 'VimEnter',
   dependencies = {
     {
       'L3MON4D3/LuaSnip',

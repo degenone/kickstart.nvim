@@ -4,10 +4,6 @@ local function get_os_name()
   return vim.uv.os_uname().sysname
 end
 
-local function is_path_valid(path)
-  return path and path ~= '' and vim.fn.filereadable(path) == 1
-end
-
 function M.get_current_path()
   local bufnr = vim.api.nvim_get_current_buf()
   local filepath = vim.api.nvim_buf_get_name(bufnr)
@@ -16,7 +12,7 @@ function M.get_current_path()
     return nil
   end
 
-  if not vim.api.nvim_buf_get_option(bufnr, 'buflisted') then
+  if not vim.bo[bufnr].buflisted then
     return nil
   end
 
@@ -40,20 +36,46 @@ function M.build_command(path)
   local os_name = get_os_name()
 
   if os_name == 'Windows_NT' then
-    local win_ps = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe'
-    local escaped = path:gsub("'", "''") -- Escape single quotes for PS
-
-    -- We go back to the simple -Path argument since we are forced into v5.1
-    return string.format('%s -NoProfile -Command "Set-Clipboard -Path \'%s\'"', win_ps, escaped)
+    local win_ps = vim.fn.exepath 'powershell.exe'
+    if win_ps == '' then
+      win_ps = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe'
+    end
+    return {
+      win_ps,
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      'Set-Clipboard -Path $args[0]',
+      path,
+    }, {}
   elseif os_name == 'Darwin' then
-    return string.format('osascript -e \'tell app "Finder" to set clipboard to (POSIX file "%s")\'', path)
+    if vim.fn.executable 'osascript' ~= 1 then return nil, 'osascript was not found in PATH' end
+    return {
+      'osascript',
+      '-e',
+      'on run argv',
+      '-e',
+      'set the clipboard to POSIX file (item 1 of argv)',
+      '-e',
+      'end run',
+      '--',
+      path,
+    }, {}
   elseif os_name == 'Linux' then
     local wayland_display = os.getenv 'WAYLAND_DISPLAY'
-    if wayland_display and wayland_display ~= '' then
-      return string.format("wl-copy --type text/uri-list 'file://%s'", path)
-    else
-      return string.format("echo 'file://%s' | xclip -i -selection clipboard -t text/uri-list", path)
+    local input = vim.uri_from_fname(path) .. '\n'
+    if wayland_display and wayland_display ~= '' and vim.fn.executable 'wl-copy' == 1 then
+      return { 'wl-copy', '--type', 'text/uri-list' }, { stdin = input }
     end
+    if vim.fn.executable 'xclip' == 1 then
+      return { 'xclip', '-i', '-selection', 'clipboard', '-t', 'text/uri-list' }, { stdin = input }
+    end
+    if vim.fn.executable 'clip.exe' == 1 then
+      -- WSL fallback. This copies the path as text because Windows clipboard
+      -- file objects cannot be created reliably from a Linux process.
+      return { 'clip.exe' }, { stdin = path }
+    end
+    return nil, 'No supported clipboard tool found (wl-copy, xclip, or clip.exe)'
   else
     return nil, 'Unsupported operating system: ' .. os_name
   end
@@ -71,17 +93,18 @@ function M.copy_to_clipboard_sync(path)
     return false, 'Path does not exist or is not readable: ' .. path
   end
 
-  local cmd, err = M.build_command(path)
+  local cmd, system_opts = M.build_command(path)
   if not cmd then
-    return false, err
+    return false, system_opts
   end
 
-  local exit_code = os.execute(cmd)
+  local result = vim.system(cmd, system_opts):wait()
 
-  if exit_code == 0 or exit_code == true then
+  if result.code == 0 then
     return true, 'File path copied to clipboard: ' .. path
   else
-    return false, 'Failed to copy file path to clipboard. Exit code: ' .. tostring(exit_code)
+    local detail = vim.trim(result.stderr or '')
+    return false, ('Failed to copy file path to clipboard (exit %d): %s'):format(result.code, detail)
   end
 end
 
@@ -109,19 +132,19 @@ function M.copy_to_clipboard(path, callback)
     return
   end
 
-  local cmd, err = M.build_command(path)
+  local cmd, system_opts = M.build_command(path)
   if not cmd then
     if callback then
-      callback(false, err)
+      callback(false, system_opts)
     else
-      vim.notify(err, vim.log.levels.ERROR)
+      vim.notify(system_opts, vim.log.levels.ERROR)
     end
     return
   end
 
-  vim.fn.jobstart(cmd, {
-    on_exit = function(_, exit_code, _)
-      if exit_code == 0 then
+  vim.system(cmd, system_opts, function(result)
+    vim.schedule(function()
+      if result.code == 0 then
         local msg = 'File path copied to clipboard: ' .. path
         if callback then
           callback(true, msg)
@@ -129,20 +152,16 @@ function M.copy_to_clipboard(path, callback)
           vim.notify(msg, vim.log.levels.INFO)
         end
       else
-        local msg = 'Failed to copy file path to clipboard. Exit code: ' .. tostring(exit_code)
+        local detail = vim.trim(result.stderr or '')
+        local msg = ('Failed to copy file path to clipboard (exit %d): %s'):format(result.code, detail)
         if callback then
           callback(false, msg)
         else
           vim.notify(msg, vim.log.levels.ERROR)
         end
       end
-    end,
-    on_stderr = function(_, data, _)
-      if data and #data > 0 then
-        vim.notify('Error: ' .. table.concat(data, '\n'), vim.log.levels.WARN)
-      end
-    end,
-  })
+    end)
+  end)
 end
 
 function M.setup(opts)

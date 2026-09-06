@@ -14,6 +14,6 @@ return {
     vim.g.undotree_SplitWidth = 30
     vim.g.undotree_DiffpanelHeight = 10
     vim.g.undotree_ShortIndicators = 1
-    vim.fn.undofile(undotree_dir)
+    vim.opt.undodir = undotree_dir
   end
 }

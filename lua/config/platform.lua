@@ -15,7 +15,9 @@ local function add_luarocks_paths()
     end
   end
 
-  local separator = package.config:sub(1, 1) == '\\' and ';' or ':'
+  -- Lua module paths use semicolons on every platform. This is distinct from
+  -- the OS PATH separator (`;` on Windows and `:` on Unix).
+  local separator = ';'
   local lua_paths = { package.path }
   local c_paths = { package.cpath }
   for _, root in ipairs(roots) do
@@ -36,7 +38,14 @@ add_luarocks_paths()
 
 -- Windows specific settings
 if vim.fn.has 'win32' == 1 then
-  vim.o.shell = 'pwsh'
+  if vim.fn.executable 'pwsh' == 1 then
+    vim.o.shell = 'pwsh'
+  else
+    vim.o.shell = 'powershell.exe'
+    vim.schedule(function()
+      vim.notify('pwsh was not found; falling back to Windows PowerShell.', vim.log.levels.WARN)
+    end)
+  end
   vim.o.shellcmdflag =
     '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;'
   -- vim.o.shellredir = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'

@@ -6,7 +6,7 @@ vim.g.have_nerd_font = true
 vim.g.dotnet_errors_only = true
 
 -- Set platform paths before vim.pack loads plugins with external dependencies.
-require('config.platform')
+require 'config.platform'
 
 -- Install and load plugins with the native package manager.
 require('config.pack').setup()

@@ -4,8 +4,35 @@ return {
   build = ':TSUpdate',
   branch = 'main',
   config = function()
-    local parsers = { 'bash', 'c', 'c_sharp', 'diff', 'html', 'http', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+    local parsers = {
+      'bash',
+      'c',
+      'c_sharp',
+      'css',
+      'diff',
+      'go',
+      'gomod',
+      'gosum',
+      'gowork',
+      'html',
+      'http',
+      'javascript',
+      'json',
+      'lua',
+      'luadoc',
+      'markdown',
+      'markdown_inline',
+      'python',
+      'query',
+      'scss',
+      'tsx',
+      'typescript',
+      'vim',
+      'vimdoc',
+      'vue',
+    }
     require('nvim-treesitter').install(parsers)
+    vim.treesitter.language.register('json', 'jsonc')
     vim.api.nvim_create_autocmd('FileType', {
       callback = function(args)
         local buf, filetype = args.buf, args.match

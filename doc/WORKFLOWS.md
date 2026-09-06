@@ -81,7 +81,7 @@ Start or continue the session with `<F5>` or `:DapContinue`. Select the built
 | `<F2>` / `:DapStepOver` | Step over |
 | `<F3>` / `:DapStepOut` | Step out |
 | `<leader>b` / `:DapToggleBreakpoint` | Toggle a breakpoint |
-| `<leader>B>` | Set a conditional breakpoint |
+| `<leader>B` | Set a conditional breakpoint |
 | `<F7>` | Toggle the DAP UI |
 | `:DapTerminate` | End the current session |
 | `:DapShowLog` | Open the DAP log |

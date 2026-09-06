@@ -58,11 +58,15 @@ return {
 }
 ```
 
-`config.pack` currently loads the manifest eagerly and then applies each
-module's `config`, `opts`, and `keys`. Fields such as `event`, `ft`, `cmd`,
-`lazy`, `cond`, and `build` are legacy lazy.nvim metadata; they do not provide
-native lazy loading or build hooks. Prefer explicit commands/autocommands in
-`config.pack` when adding those behaviours.
+`config.pack` registers the manifest without placing every package on
+`runtimepath`. Specs without lazy triggers, and specs with `lazy = false`, load
+at startup. The adapter supports `event`, `ft`, and `cmd` triggers as well as
+lazy key mappings. Dependencies are sourced as a tree before their setup
+callbacks run.
+
+Fields such as `cond`, `priority`, and `build` are still descriptive legacy
+metadata. Add native build handling to `config.pack`, and put source version or
+branch constraints in its manifest, when a plugin requires them.
 
 Useful commands:
 
@@ -84,7 +88,8 @@ built by this setup.
 
 ## Platform notes
 
-`config.platform` configures PowerShell on Windows, finds `python3` on Unix,
+`config.platform` prefers PowerShell 7 on Windows and falls back to Windows
+PowerShell with a warning. It finds `python3` on Unix,
 and adds user LuaRocks locations for REST's optional XML and external-body
 support. It checks both Lua 5.1 and 5.5 rock paths.
 

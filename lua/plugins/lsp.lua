@@ -5,6 +5,9 @@ return {
     'williamboman/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
     { 'j-hui/fidget.nvim', opts = {} },
+    -- cmp-nvim-lsp's after/plugin registration requires cmp on runtimepath,
+    -- while the heavier snippet/configuration setup remains deferred.
+    'hrsh7th/nvim-cmp',
     'hrsh7th/cmp-nvim-lsp',
     { 'seblyng/roslyn.nvim', opts = {} },
   },
@@ -86,7 +89,7 @@ return {
       },
       -- rust_analyzer = {},
       ts_ls = {
-        filetypes = { 'typescript', 'javascript', 'javascriptreact', 'javascript.jsx', 'typescriptreact', 'typescript.tsx', 'vue' },
+        filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
         init_options = {
           plugins = {
             {
@@ -114,7 +117,8 @@ return {
         settings = {
           python = {
             analysis = {
-              -- Disable pyright diagnostics, use flake8 for linting instead
+              -- Keep Pyright for completion/navigation and Flake8 as the sole
+              -- diagnostic provider, avoiding duplicate Python diagnostics.
               diagnosticMode = 'off',
             },
           },
@@ -178,6 +182,8 @@ return {
       'emmet_language_server', -- Used for HTML/CSS/JS/TS/... autocompletion
       'jsonlint', -- Used to lint JSON files
       'flake8', -- Used to lint Python files
+      'prettier', -- Used to format web files
+      'eslint_d', -- Used to lint JavaScript, TypeScript, and Vue files
       'pyright', -- Used to provide Python LSP
       'vue-language-server', -- Used for Vue.js development
       'roslyn-language-server', -- Used for C# development
@@ -186,7 +192,8 @@ return {
 
     require('mason-lspconfig').setup {
       automatic_enable = {
-        exclude = { 'roslyn_ls' },
+        -- Roslyn is managed by roslyn.nvim; Stylua is a formatter here, not an LSP.
+        exclude = { 'roslyn_ls', 'stylua' },
       },
     }
 

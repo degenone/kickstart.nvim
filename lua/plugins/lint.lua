@@ -12,6 +12,8 @@ return {
       lint.linters_by_ft['typescript'] = { 'eslint_d' }
       lint.linters_by_ft['typescriptreact'] = { 'eslint_d' }
       lint.linters_by_ft['vue'] = { 'eslint_d' }
+      lint.linters_by_ft['json'] = { 'jsonlint' }
+      lint.linters_by_ft['jsonc'] = { 'jsonlint' }
 
       lint.linters_by_ft['clojure'] = nil
       lint.linters_by_ft['dockerfile'] = nil

@@ -30,6 +30,20 @@ local check_external_reqs = function()
     end
   end
 
+  if vim.fn.has 'win32' == 1 then
+    if vim.fn.executable 'pwsh' == 1 then
+      vim.health.ok "Found preferred Windows shell: 'pwsh'"
+    else
+      vim.health.warn "Could not find 'pwsh'; Windows PowerShell will be used"
+    end
+  elseif vim.uv.os_uname().sysname == 'Linux' then
+    if vim.fn.executable 'wl-copy' == 1 or vim.fn.executable 'xclip' == 1 or vim.fn.executable 'clip.exe' == 1 then
+      vim.health.ok 'Found a supported Linux/WSL clipboard command'
+    else
+      vim.health.warn "Could not find 'wl-copy', 'xclip', or 'clip.exe' for file copying"
+    end
+  end
+
   return true
 end
 

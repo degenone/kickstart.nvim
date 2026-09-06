@@ -3,7 +3,8 @@
 
 return {
   'windwp/nvim-autopairs',
-  event = 'InsertEnter',
+  -- Initialize after the UI appears so this does not add first-insert latency.
+  event = 'VimEnter',
   -- Optional dependency
   dependencies = { 'hrsh7th/nvim-cmp' },
   config = function()
