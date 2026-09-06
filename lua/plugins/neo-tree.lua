@@ -9,13 +9,16 @@ return {
     'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
     'MunifTanjim/nui.nvim',
   },
+  -- Load before startup directory buffers so Neo-tree can replace Netrw.
+  lazy = false,
   cmd = 'Neotree',
   keys = {
     { '\\', ':Neotree toggle<CR>', desc = 'NeoTree toggle' },
   },
   opts = {
     filesystem = {
-      hijack_netrw_behavior = 'disabled',
+      -- Keep the directory tree in Neo-tree's normal sidebar position.
+      hijack_netrw_behavior = 'open_default',
       window = {
         mappings = {
           ['\\'] = 'close_window',
