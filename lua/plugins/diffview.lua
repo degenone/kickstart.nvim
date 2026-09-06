@@ -13,6 +13,7 @@ return {
       enhanced_diff_hl = true,
       auto_refresh = true,
       view = {
+        foldlevel = 99,
         merge_tool = {
           layout = 'diff3_mixed',
         },
