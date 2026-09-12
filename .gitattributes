@@ -1,0 +1,2 @@
+# Keep text files portable between Windows, macOS, and Linux.
+* text=auto eol=lf
