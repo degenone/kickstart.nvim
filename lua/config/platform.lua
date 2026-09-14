@@ -21,14 +21,14 @@ local function add_luarocks_paths()
   local lua_paths = { package.path }
   local c_paths = { package.cpath }
   for _, root in ipairs(roots) do
-    -- Windows currently uses Lua 5.1; Homebrew's LuaRocks uses Lua 5.5.
-    -- These REST dependencies are pure Lua, so Neovim can load either.
-    for _, version in ipairs { '5.1', '5.5' } do
+    -- REST dependencies are pure Lua; prefer the Lua 5.4 rocks on macOS.
+    for _, version in ipairs { '5.4', '5.1', '5.5' } do
       lua_paths[#lua_paths + 1] = vim.fs.joinpath(root, 'share', 'lua', version, '?.lua')
       lua_paths[#lua_paths + 1] = vim.fs.joinpath(root, 'share', 'lua', version, '?', 'init.lua')
-      c_paths[#c_paths + 1] = vim.fs.joinpath(root, 'lib', 'lua', version, '?.dll')
-      c_paths[#c_paths + 1] = vim.fs.joinpath(root, 'lib', 'lua', version, '?.so')
     end
+    -- Native modules must match Neovim's Lua 5.1/LuaJIT ABI.
+    c_paths[#c_paths + 1] = vim.fs.joinpath(root, 'lib', 'lua', '5.1', '?.dll')
+    c_paths[#c_paths + 1] = vim.fs.joinpath(root, 'lib', 'lua', '5.1', '?.so')
   end
   package.path = table.concat(lua_paths, separator)
   package.cpath = table.concat(c_paths, separator)
