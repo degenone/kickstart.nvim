@@ -8,12 +8,14 @@ return {
     { '<leader>gc', ':DiffviewClose<CR>', desc = 'Close diff view' },
   },
   config = function()
+    vim.opt.diffopt:append 'context:15'
+
     require('diffview').setup {
       diff_binaries = false,
       enhanced_diff_hl = true,
       auto_refresh = true,
       view = {
-        foldlevel = 99,
+        foldlevel = 0,
         merge_tool = {
           layout = 'diff3_mixed',
         },
