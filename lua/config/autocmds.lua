@@ -14,6 +14,18 @@ vim.api.nvim_create_autocmd('ColorScheme', {
   desc = 'Restore trailing whitespace highlight',
 })
 
+local function set_yank_highlight()
+  vim.api.nvim_set_hl(0, 'YankHighlight', { bg = '#d79921', fg = '#1d2021' })
+end
+
+set_yank_highlight()
+
+vim.api.nvim_create_autocmd('ColorScheme', {
+  group = vim.api.nvim_create_augroup('yank-highlight', { clear = true }),
+  callback = set_yank_highlight,
+  desc = 'Restore yank highlight',
+})
+
 vim.api.nvim_create_autocmd({ 'BufWinEnter', 'WinEnter' }, {
   group = vim.api.nvim_create_augroup('extra-whitespace-match', { clear = true }),
   callback = function()
@@ -30,7 +42,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
-    vim.highlight.on_yank()
+    vim.highlight.on_yank { higroup = 'YankHighlight', timeout = 300 }
   end,
 })
 
